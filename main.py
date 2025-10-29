@@ -1,10 +1,12 @@
 # weather app for F1 circuits
 #author Jameson
 
+from datetime import datetime
 import json
 import tkinter as tk
 from tkinter import ttk
 import requests
+from pandas.core.common import not_none
 
 #load circuits from json file
 with open("circuits.json", "r") as f:
@@ -13,6 +15,20 @@ with open("circuits.json", "r") as f:
 # Note: keys are strings, so when looking up:
 with open("weathercodes.json", "r") as w:
     weather_descriptions = json.load(w)
+
+def get_next_race():
+    today = datetime.today()
+    upcoming_races = []
+
+    for circuit_name, info in circuits.items():
+        race_date = datetime.strptime(info["race_date"], "%Y-%m-%d")
+        if race_date >= today:
+            upcoming_races.append((race_date, circuit_name))
+    if not upcoming_races:
+        return None #all races are past
+
+    next_race = min(upcoming_races, key=lambda x: x[0])
+    return next_race[1] #circuit name
 
 def get_weather(circuit_name):
     if circuit_name not in circuits:
